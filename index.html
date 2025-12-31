@@ -78,6 +78,13 @@
         }
         h2 { color: var(--secondary); }
         
+        .name-input {
+            width: 80%; padding: 15px; border: 2px solid #e5e7eb; border-radius: 12px;
+            font-size: 1.1rem; margin-bottom: 20px; text-align: center; font-family: inherit;
+            transition: all 0.3s; background: #f9fafb; color: #374151;
+        }
+        .name-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); background: white; }
+
         .btn {
             background: linear-gradient(145deg, var(--primary-light), var(--primary));
             color: white; border: none;
@@ -106,6 +113,14 @@
             padding: 2px 8px; border-radius: 12px; font-weight: bold;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
+        /* Liderlik Tablosu Butonu */
+        .btn-leaderboard {
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            color: white; margin-top: 15px; font-size: 1rem;
+            box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
+        }
+        .btn-leaderboard:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(217, 119, 6, 0.4); }
 
         /* GENEL SINAV BUTONU */
         .btn-general-exam {
@@ -233,6 +248,7 @@
         .modal-content {
             background: white; padding: 30px; border-radius: 24px; width: 85%;
             text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            max-height: 80vh; overflow-y: auto;
         }
 
         .question-text { 
@@ -248,6 +264,24 @@
             text-align: center; font-weight: bold; font-size: 0.95rem; margin-bottom: 20px;
             border-radius: 12px; display: none; border: 1px solid #fcd34d;
         }
+
+        /* Liderlik Tablosu Stilleri */
+        .leaderboard-table {
+            width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95rem;
+        }
+        .leaderboard-table th {
+            background-color: #f3f4f6; color: #374151; padding: 12px; text-align: left; font-weight: bold;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .leaderboard-table td {
+            padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: left;
+        }
+        .leaderboard-table tr:nth-child(even) { background-color: #f9fafb; }
+        .leaderboard-table tr:hover { background-color: #f0fdf4; }
+        
+        .rank-1 { color: #d97706; font-weight: bold; font-size: 1.1rem; } /* Altın */
+        .rank-2 { color: #4b5563; font-weight: bold; } /* Gümüş */
+        .rank-3 { color: #92400e; font-weight: bold; } /* Bronz */
 
         /* --- MASAÜSTÜ / GENİŞ EKRAN --- */
         @media (min-width: 1024px) {
@@ -281,6 +315,9 @@
         <!-- ANA MENÜ -->
         <div id="home-screen" class="screen">
             <h1>⚽ Futbol Quiz 2025</h1>
+            
+            <input type="text" id="player-name" class="name-input" placeholder="Adınızı Yazınız..." maxlength="25">
+
             <p style="color: #6b7280; font-weight: 500;">Bilgini test etmek için bir kategori seç:</p>
             <br>
             <button id="btn-general-main" class="btn btn-general-exam" onclick="startGeneralExam()">
@@ -288,6 +325,12 @@
             </button>
             <div style="width:100%; height:1px; background:#e5e7eb; margin:15px 0;"></div>
             <div id="subject-buttons" style="width:100%;"></div>
+            
+            <!-- Liderlik Tablosu Butonu -->
+            <button class="btn btn-leaderboard" onclick="openLeaderboard()">
+                🏅 Liderlik Tablosu
+            </button>
+
             <div style="margin-top:20px; font-size:0.8rem; color:#9ca3af; font-weight: 500;">
                 Toplam <span id="total-q-count">0</span> futbol sorusu yüklendi.
             </div>
@@ -314,7 +357,6 @@
                 <button class="btn-nav" id="prev-btn" onclick="prevQuestion()">⬅️ Önceki</button>
                 <button class="btn-nav primary" id="next-btn" onclick="nextQuestion()">Sonraki ➡️</button>
             </div>
-            <!-- Eski bitirme butonu kaldırıldı -->
         </div>
 
         <!-- SONUÇ EKRANI -->
@@ -333,6 +375,7 @@
 
             <h2>Toplam Puan: <span id="final-score">0</span></h2>
             <p id="feedback-text"></p>
+            <p id="save-status" style="font-size:0.8rem; color:#666; margin-top:5px; min-height: 20px;"></p>
             <button class="btn" onclick="goHome()">Ana Menüye Dön</button>
         </div>
 
@@ -355,6 +398,28 @@
             </div>
         </div>
 
+        <!-- LİDERLİK TABLOSU MODALI -->
+        <div id="leaderboard-modal" class="modal-overlay">
+            <div class="modal-content">
+                <h3>🏆 En İyi Skorlar</h3>
+                <div id="leaderboard-loading">Yükleniyor...</div>
+                <table class="leaderboard-table" id="leaderboard-content" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">#</th>
+                            <th>Oyuncu</th>
+                            <th>Kategori</th>
+                            <th>Puan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Veriler buraya gelecek -->
+                    </tbody>
+                </table>
+                <button class="btn" style="margin-top: 20px; background-color: #6B7280;" onclick="closeLeaderboard()">Kapat</button>
+            </div>
+        </div>
+
         <!-- ANA MENÜ ÇIKIŞ ONAY MODALI -->
         <div id="home-confirm-modal" class="modal-overlay">
             <div class="modal-content">
@@ -369,17 +434,12 @@
 
     <script>
         // --- AYARLAR ---
-        // Yeni Sheet ID: 2PACX-1vQDVN7YKeVt8ImVQuQVXJ0oC2SvmQKDbEDIXvyS9VJ9Ysz7EAjAcXZBiVyQkIQgZ5wQ9wxtQr3Str9t
         const SHEET_ID = "2PACX-1vQDVN7YKeVt8ImVQuQVXJ0oC2SvmQKDbEDIXvyS9VJ9Ysz7EAjAcXZBiVyQkIQgZ5wQ9wxtQr3Str9t";
         const timeStamp = new Date().getTime(); 
         const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?output=csv&gid=0&v=${timeStamp}`;
-
-        // Proxy Sıralaması
-        const PROXIES = [
-            `https://corsproxy.io/?${encodeURIComponent(SHEET_CSV_URL)}`,
-            `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(SHEET_CSV_URL)}`,
-            `https://api.allorigins.win/raw?url=${encodeURIComponent(SHEET_CSV_URL)}`
-        ];
+        
+        // Google Apps Script URL
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxze4oPoXLNDfTSRJvyl8VE-EOjCv8ekaKA9cOdZPBQ9EVfSCe1mQinjtv1sTstCcnC/exec";
 
         // --- DEĞİŞKENLER ---
         let allQuestions = [];
@@ -393,60 +453,127 @@
         
         let selectedLesson = null;
         let isGeneralExam = false; 
+        let playerName = ""; 
         
         let isReviewMode = false;
         let isSequentialReview = false; 
         let wrongQuestionIndices = []; 
         let reviewStep = 0; 
 
-        // --- YENİ DEĞİŞKENLER (BOŞ SORU MODU) ---
         let isEmptyReviewMode = false;
         let emptyIndicesToReview = [];
         let emptyReviewStep = 0;
 
-        // --- BAŞLANGIÇ ---
-        window.onload = function() { tryFetchData(0); };
+        // --- FETCH HELPER (GÜÇLENDİRİLMİŞ PROXY YAPISI) ---
+        function fetchWithProxies(targetUrl, responseType, onSuccess, onError) {
+            // Timestamp ekle
+            const sep = targetUrl.includes('?') ? '&' : '?';
+            const urlWithTs = targetUrl + sep + "v=" + new Date().getTime();
 
-        function tryFetchData(proxyIndex) {
-            const statusText = document.getElementById('status-text');
-            const errorLog = document.getElementById('error-log');
+            // AllOrigins "get" metodu redirectleri sunucu tarafında çözer. En güvenlisi budur.
+            // "raw" metodu redirectte takılabilir.
+            const allOriginsUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(urlWithTs)}`;
+            
+            // Diğer proxy'ler
+            const corsProxyUrl = `https://corsproxy.io/?${encodeURIComponent(urlWithTs)}`;
+            const codeTabsUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(urlWithTs)}`;
 
-            if (proxyIndex >= PROXIES.length) {
-                statusText.innerText = "Sunucuya bağlanılamadı.";
-                statusText.style.color = "red";
-                document.getElementById('retry-btn').style.display = 'inline-block';
-                document.getElementById('demo-btn').style.display = 'inline-block';
-                return;
+            // Deneme sırası
+            const queue = [
+                { url: allOriginsUrl, type: 'wrapper' }, // Öncelik AllOrigins Wrapper
+                { url: corsProxyUrl, type: 'direct' },
+                { url: codeTabsUrl, type: 'direct' },
+                { url: urlWithTs, type: 'direct' } // Son çare direkt
+            ];
+            
+            let currentIdx = 0;
+
+            function tryNext() {
+                if (currentIdx >= queue.length) {
+                    if (onError) onError("Tüm sunucular denendi, bağlantı başarısız.");
+                    return;
+                }
+
+                const item = queue[currentIdx];
+                currentIdx++;
+
+                console.log(`Veri çekiliyor (${item.type}):`, item.url);
+
+                fetch(item.url)
+                    .then(res => {
+                        if (!res.ok) throw new Error("HTTP " + res.status);
+                        return res.json(); // Her zaman JSON bekle (allorigins de json döner)
+                    })
+                    .then(data => {
+                        // Eğer Wrapper ise (allorigins), asıl veri 'contents' içindedir.
+                        if (item.type === 'wrapper') {
+                            if (!data.contents) throw new Error("Wrapper boş veri döndürdü");
+                            
+                            // Eğer beklenen responseType JSON ise ve contents string geldiyse parse et
+                            if (responseType === 'json' && typeof data.contents === 'string') {
+                                try {
+                                    onSuccess(JSON.parse(data.contents));
+                                } catch (e) {
+                                    // Belki de string isteniyordur ama JSON denedik
+                                    onSuccess(data.contents);
+                                }
+                            } else {
+                                onSuccess(data.contents);
+                            }
+                        } else {
+                            // Direct proxy (corsproxy vb.) direkt sonucu döner
+                            onSuccess(data);
+                        }
+                    })
+                    // Eğer direct proxy JSON döndürmediyse (örneğin CSV için text lazımsa)
+                    // Yukarıdaki .json() patlar. Bu yüzden text fallback yapalım.
+                    .catch(err => {
+                        if (item.type === 'direct' && responseType === 'text') {
+                            // JSON parse hatası aldıysak ve text istiyorsak tekrar dene
+                            fetch(item.url).then(r => r.text()).then(t => onSuccess(t)).catch(() => tryNext());
+                        } else {
+                            console.warn(`Proxy hatası (${item.url}):`, err);
+                            tryNext();
+                        }
+                    });
             }
 
-            statusText.innerText = `Veriler Çekiliyor... (Yöntem ${proxyIndex + 1})`;
-            
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            tryNext();
+        }
 
-            fetch(PROXIES[proxyIndex], { signal: controller.signal })
-                .then(response => {
-                    clearTimeout(timeoutId);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response.text();
-                })
-                .then(csvText => {
+        // --- BAŞLANGIÇ ---
+        window.onload = function() { 
+            document.getElementById('status-text').innerText = "Veriler Çekiliyor...";
+            
+            // CSV verisi text olduğu için özel işlem
+            fetchWithProxies(SHEET_CSV_URL, 'text', 
+                (csvText) => {
+                    // AllOrigins wrap ederse JSON içinden string gelir, direct gelirse string gelir.
+                    // fetchWithProxies bunu halleder.
+                    if (typeof csvText !== 'string') {
+                        // Bazen JSON objesi gelebilir (eğer sunucu hata mesajı döndüyse)
+                        csvText = JSON.stringify(csvText);
+                    }
+                    
                     const questions = parseCSV(csvText);
                     if (questions.length > 0) {
                         allQuestions = questions;
                         initApp();
                     } else {
-                        throw new Error("Veri boş veya format hatalı.");
+                        document.getElementById('error-log').innerText = "Veri formatı hatalı veya boş.";
+                        document.getElementById('error-log').style.display = 'block';
                     }
-                })
-                .catch(err => {
-                    clearTimeout(timeoutId);
-                    console.warn(`Proxy ${proxyIndex} hatası:`, err);
-                    errorLog.style.display = 'block';
-                    errorLog.innerHTML += `<div>Yöntem ${proxyIndex + 1} Başarısız: ${err.message}</div>`;
-                    tryFetchData(proxyIndex + 1);
-                });
-        }
+                },
+                (errorMsg) => {
+                    document.getElementById('status-text').innerText = "Bağlantı Başarısız.";
+                    document.getElementById('status-text').style.color = "red";
+                    document.getElementById('error-log').innerHTML = errorMsg;
+                    document.getElementById('error-log').style.display = 'block';
+                    document.getElementById('retry-btn').style.display = 'inline-block';
+                    document.getElementById('demo-btn').style.display = 'inline-block';
+                }
+            );
+        };
 
         // --- CSV AYRIŞTIRICI ---
         function parseCSV(text) {
@@ -493,7 +620,7 @@
                     text: clean[2],
                     options: [clean[3] || "A", clean[4] || "B", clean[5] || "C", clean[6] || "D"],
                     correct: correctIdx,
-                    time: parseInt(clean[8]) || 30, // Artık kullanılmıyor
+                    time: parseInt(clean[8]) || 30, 
                     hintText: clean[9] || "Bu soru için ipucu yok.",
                     points: 10
                 });
@@ -501,7 +628,7 @@
             return result;
         }
 
-        // --- SKOR KAYIT SİSTEMİ ---
+        // --- SKOR KAYIT SİSTEMİ (Yerel) ---
         function saveResult(lessonSlug, score) {
             localStorage.setItem('fq25_score_' + lessonSlug, score);
         }
@@ -510,17 +637,107 @@
             return localStorage.getItem('fq25_score_' + lessonSlug);
         }
 
+        // --- SKOR KAYIT SİSTEMİ (Bulut - Google Sheets) ---
+        function saveScoreToCloud(name, score, category) {
+            const statusEl = document.getElementById('save-status');
+            statusEl.innerText = "Skor kaydediliyor...";
+            
+            const formData = new FormData();
+            formData.append('isim', name);
+            formData.append('puan', score);
+            formData.append('kategori', category);
+
+            // POST işlemi için proxy kullanmaya gerek yok (no-cors)
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors' 
+            })
+            .then(() => {
+                console.log("Skor başarıyla gönderildi.");
+                statusEl.innerText = `Skorunuz (${score}) başarıyla kaydedildi! ✅`;
+                statusEl.style.color = "green";
+            })
+            .catch(error => {
+                console.error("Skor gönderim hatası:", error);
+                statusEl.innerText = "Skor kaydedilemedi (Bağlantı hatası). ❌";
+                statusEl.style.color = "red";
+            });
+        }
+
+        // --- LİDERLİK TABLOSU GETİRME ---
+        function openLeaderboard() {
+            document.getElementById('leaderboard-modal').style.display = 'flex';
+            document.getElementById('leaderboard-loading').style.display = 'block';
+            document.getElementById('leaderboard-content').style.display = 'none';
+            document.getElementById('leaderboard-loading').innerText = "Yükleniyor...";
+            
+            fetchWithProxies(GOOGLE_SCRIPT_URL, 'json', 
+                (data) => {
+                    renderLeaderboard(data);
+                },
+                (errorMsg) => {
+                    console.error("Liderlik tablosu hatası:", errorMsg);
+                    document.getElementById('leaderboard-loading').innerHTML = "Veriler yüklenemedi.<br>Lütfen daha sonra tekrar deneyin.";
+                }
+            );
+        }
+
+        function closeLeaderboard() {
+            document.getElementById('leaderboard-modal').style.display = 'none';
+        }
+
+        function renderLeaderboard(data) {
+            document.getElementById('leaderboard-loading').style.display = 'none';
+            document.getElementById('leaderboard-content').style.display = 'table';
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+
+            // Veri kontrolü (bazen boş dizi veya hatalı nesne gelebilir)
+            if(!data || !Array.isArray(data) || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4">Henüz kayıt yok.</td></tr>';
+                return;
+            }
+
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                let rankClass = "";
+                if(index === 0) rankClass = "rank-1";
+                if(index === 1) rankClass = "rank-2";
+                if(index === 2) rankClass = "rank-3";
+
+                tr.innerHTML = `
+                    <td class="${rankClass}">${index + 1}</td>
+                    <td style="font-weight:600;">${row.name || row.isim}</td>
+                    <td style="color:#666;">${row.category || row.kategori}</td>
+                    <td style="font-weight:bold; color:var(--primary);">${row.score || row.puan}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- İSİM KONTROLÜ ---
+        function checkName() {
+            const input = document.getElementById('player-name');
+            const val = input.value.trim();
+            if (!val) {
+                alert("Lütfen maça başlamadan önce adınızı yazın! 📝");
+                input.focus();
+                return false;
+            }
+            playerName = val;
+            return true;
+        }
+
         // --- UYGULAMA BAŞLATMA ---
         function initApp() {
             document.getElementById('loading-screen').style.display = 'none';
             document.getElementById('home-screen').classList.add('active');
             document.getElementById('total-q-count').innerText = allQuestions.length;
 
-            // Genel Sınav Butonunu Güncelle
             const generalScore = getResult('general_exam');
             const generalBtn = document.getElementById('btn-general-main');
             if(generalScore !== null) {
-                // Varsa eski badge'i temizle
                 const oldBadge = generalBtn.querySelector('.general-score-badge');
                 if(oldBadge) oldBadge.remove();
                 
@@ -530,7 +747,6 @@
                 generalBtn.appendChild(badge);
             }
 
-            // Kategorileri dinamik olarak bul
             const subjects = [...new Set(allQuestions.map(q => q.lessonDisplay))];
             const btnContainer = document.getElementById('subject-buttons');
             btnContainer.innerHTML = '';
@@ -539,7 +755,6 @@
                 const btn = document.createElement('button');
                 btn.className = 'btn btn-subject';
                 
-                // Kategorinin slug'ını bul
                 const sampleQ = allQuestions.find(q => q.lessonDisplay === subj);
                 const lessonSlug = sampleQ ? sampleQ.lesson : "";
                 
@@ -547,7 +762,6 @@
                 titleSpan.innerText = "⚽ " + subj;
                 btn.appendChild(titleSpan);
 
-                // Skor kontrolü
                 const savedScore = getResult(lessonSlug);
                 if (savedScore !== null) {
                     const badge = document.createElement('span');
@@ -562,13 +776,14 @@
         }
 
         function startGeneralExam() {
+            if (!checkName()) return; 
+
             isGeneralExam = true;
             isReviewMode = false;
             isEmptyReviewMode = false;
             currentQuestions = [];
-            selectedLesson = 'general_exam'; // Kayıt için özel slug
+            selectedLesson = 'general_exam'; 
 
-            // Tüm sorulardan rastgele 20 tane seç
             let pool = [...allQuestions];
             pool.sort(() => Math.random() - 0.5);
             currentQuestions = pool.slice(0, 20);
@@ -583,21 +798,20 @@
             
             setupQuizUI();
             
-            // TOPLAM SÜRE HESABI: Soru Sayısı * 10 sn
             timeLeft = currentQuestions.length * 10;
-            
             startGlobalTimer(); 
             loadQuestion();
         }
 
         function preStartQuiz(lessonSlug) {
+            if (!checkName()) return; 
+
             isGeneralExam = false; 
             selectedLesson = lessonSlug;
             document.getElementById('timer-modal').style.display = 'flex';
         }
 
         function confirmStart(enableTimer) {
-            // Timer artık zorunlu
             document.getElementById('timer-modal').style.display = 'none';
             startQuiz(selectedLesson);
         }
@@ -617,9 +831,7 @@
             
             setupQuizUI();
             
-            // TOPLAM SÜRE HESABI: Soru Sayısı * 10 sn
             timeLeft = currentQuestions.length * 10;
-            
             startGlobalTimer();
             loadQuestion();
         }
@@ -644,7 +856,6 @@
                 }
                 qIndex = wrongQuestionIndices[reviewStep];
             } else if (isEmptyReviewMode) {
-                // Boş soru modunda indexi listeden al
                 if (!emptyIndicesToReview || emptyIndicesToReview.length === 0 || emptyReviewStep >= emptyIndicesToReview.length) {
                     isEmptyReviewMode = false;
                     checkFinish();
@@ -661,7 +872,6 @@
                 return;
             }
             
-            // Eğer normal moddaysak veya boş modundaysak güncel indexi senkron tut
             if(!isReviewMode) currentIndex = qIndex;
 
             const selectedAnswer = userAnswers[qIndex]; 
@@ -677,22 +887,17 @@
                  questionLabel = `${qIndex + 1}) `;
             }
             
-            // Soru Metni
             document.getElementById('question-text').innerHTML = questionLabel + q.text;
 
-            // Zamanlayıcı Gösterimi
             if (!isReviewMode) {
-                // isEmptyReviewMode sırasında da süre işlediği için burası çalışmalı
                 updateTimerDisplay();
                 document.getElementById('time-display').style.visibility = 'visible';
                 document.getElementById('time-display').style.color = "var(--danger)"; 
             } else {
-                // İnceleme modunda sayacı durdur
                 if(timer) clearInterval(timer);
                 document.getElementById('time-display').style.visibility = 'hidden';
             }
             
-            // İlerleme Çubuğu
             let total = currentQuestions.length;
             let current = qIndex;
             
@@ -705,7 +910,6 @@
             const percent = total > 0 ? (current / total) * 100 : 0;
             document.getElementById('progress-fill').style.width = `${percent}%`;
 
-            // Şıklar
             const container = document.getElementById('options-container');
             container.innerHTML = '';
             const letters = ['A', 'B', 'C', 'D'];
@@ -728,10 +932,7 @@
                 }
                 container.appendChild(btn);
             });
-
-            // İpucu - Kaldırıldı
             
-            // prev-btn
             if (isEmptyReviewMode) {
                  document.getElementById('prev-btn').disabled = (emptyReviewStep === 0);
             } else {
@@ -748,7 +949,6 @@
             document.getElementById('next-btn').innerText = nextText;
         }
 
-        // GLOBAL TOPLAM SAYAÇ
         function startGlobalTimer() {
             if (timer) clearInterval(timer);
             isTimerRunning = true;
@@ -772,7 +972,6 @@
         }
 
         function selectAnswer(qIndex, idx) {
-            // Süre bittiyse işlem yapma (Gerçi endQuiz çağrılıyor ama ekstra güvenlik)
             if (timeLeft <= 0) return;
 
             userAnswers[qIndex] = idx;
@@ -801,7 +1000,6 @@
                 if (emptyReviewStep < emptyIndicesToReview.length - 1) { 
                     emptyReviewStep++; loadQuestion(); 
                 } else { 
-                    // Boş sorular bitti
                     isEmptyReviewMode = false;
                     checkFinish(); 
                 }
@@ -814,7 +1012,6 @@
         function checkFinish() {
             const hasEmpty = userAnswers.includes(null) || userAnswers.includes(undefined);
             if (hasEmpty) {
-                // Modal açılsa bile sayaç arka planda işlemeye devam eder (standart sınav mantığı)
                 document.getElementById('finish-warning-modal').style.display = 'flex';
             } else {
                 endQuiz();
@@ -824,7 +1021,6 @@
         function goToFirstEmpty() {
             document.getElementById('finish-warning-modal').style.display = 'none';
             
-            // Boş soruların indekslerini bul
             emptyIndicesToReview = userAnswers.map((ans, idx) => (ans === null || ans === undefined) ? idx : -1).filter(idx => idx !== -1);
             
             if (emptyIndicesToReview.length > 0) {
@@ -832,7 +1028,6 @@
                 emptyReviewStep = 0;
                 loadQuestion();
             } else {
-                // Eğer boş soru kalmamışsa bitir
                 endQuiz();
             }
         }
@@ -843,7 +1038,7 @@
         }
 
         function endQuiz() {
-            clearInterval(timer); // Sayacı durdur
+            clearInterval(timer);
             document.getElementById('quiz-screen').classList.remove('active');
             document.getElementById('result-screen').classList.add('active');
             
@@ -882,8 +1077,17 @@
             document.getElementById('res-empty').innerText = emptyCount;
             document.getElementById('final-score').innerText = score;
             
-            // SONUCU KAYDET
             saveResult(selectedLesson, score);
+
+            let categoryName = "Kategori";
+            if (selectedLesson === 'general_exam') {
+                categoryName = "Karışık Sınav";
+            } else {
+                const q = allQuestions.find(q => q.lesson === selectedLesson);
+                if(q) categoryName = q.lessonDisplay;
+            }
+
+            saveScoreToCloud(playerName, score, categoryName);
 
             const wrongBox = document.getElementById('wrong-box');
             if (wrongCount > 0) {
@@ -954,8 +1158,6 @@
             document.getElementById('quiz-screen').classList.remove('active');
             document.getElementById('result-screen').classList.remove('active');
             document.getElementById('home-screen').classList.add('active');
-            // Ana menüye dönerken butonları (skorları) güncellemek için tekrar initApp çağırabiliriz
-            // Ancak sayfayı yenilemeden güncellemek daha şık olur.
             initApp(); 
         }
 
